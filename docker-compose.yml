@@ -1,9 +1,15 @@
 version: '3'
 
+networks:
+  homeserver:
+    driver: bridge
+    
 services:
   plex:
     image: linuxserver/plex
     container_name: plex
+    networks:
+      - homeserver
     ports:
       - "32400:32400"
     environment:
@@ -14,4 +20,16 @@ services:
     volumes:
       - ./media:/media
       - ./config/plex:/config
+    restart: unless-stopped
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    networks:
+      - homeserver
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - plex
     restart: unless-stopped
